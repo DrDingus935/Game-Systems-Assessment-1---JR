@@ -32,16 +32,16 @@ public class StateMachineMovement : MonoBehaviour
     // How many jumps are allowed total?
     [SerializeField] private int jumpsAllowed = 2;
 
-    [SerializeField] private float slideDuration = 1f;
-    [SerializeField] private float slideSpeedBoost = 5f;
-    [SerializeField] private float slideCooldown = 1f;
+    [SerializeField] private float slideDuration = 1f;   // Duration of a slde in seconds
+    [SerializeField] private float slideSpeedBoost = 5f; // Additional speed apllied when sliding
+    [SerializeField] private float slideCooldown = 1f; // cooldown between sliding
 
-    private float slideTimer;
+    private float slideTimer; 
     private float slideCooldownTimer;
 
-    [SerializeField] private Transform playerModel;
-    [SerializeField] private float slideTiltAngle = 45f;
-    [SerializeField] private float tiltSpeed = 10f;
+    [SerializeField] private Transform playerModel;  // the child model for the player for tilting
+    [SerializeField] private float slideTiltAngle = 45f; // tilt angle
+    [SerializeField] private float tiltSpeed = 10f; // lerp speed
 
     private Rigidbody rb;
 
@@ -149,7 +149,7 @@ public class StateMachineMovement : MonoBehaviour
             }
             if (Input.GetKeyDown(KeyCode.LeftControl))
             {
-                StartSlide();
+                StartSlide(); // Change to Sliding
             }
         }
     }
@@ -237,16 +237,20 @@ public class StateMachineMovement : MonoBehaviour
     {
         slideTimer += Time.deltaTime;
 
+        // adds speed boost to walkSpeed
         Vector3 slideDir = rb.linearVelocity.normalized * (walkSpeed + slideSpeedBoost);
         slideDir.y = rb.linearVelocity.y;
         rb.linearVelocity = slideDir;
 
+
+        // tilt the child mdel smoothly
         if (playerModel != null)
         {
             Quaternion targetRotation = Quaternion.Euler(slideTiltAngle, playerModel.localEulerAngles.y, playerModel.localEulerAngles.z);
             playerModel.localRotation = Quaternion.Lerp(playerModel.localRotation, targetRotation, Time.deltaTime * tiltSpeed);
         }
 
+        // endslide doohicky
         if (slideTimer >= slideDuration || !IsGrounded())
         {
             currentState = State.Walk;
@@ -287,8 +291,11 @@ public class StateMachineMovement : MonoBehaviour
         jumpsRemaining--;    // same as 'jumpsremaining -= 1
     }
 
+
+    //
     private void StartSlide()
     {
+        // wait for cooldown completeion
         if (slideCooldownTimer <= 0)
         {
             currentState = State.Slide;
